@@ -1,0 +1,12 @@
+if TARGET_IMX8QXP_AI_ML
+
+config SYS_BOARD
+	default "imx8qxp_ai_ml"
+
+config SYS_VENDOR
+	default "einfochips"
+
+config SYS_CONFIG_NAME
+	default "imx8qxp_ai_ml"
+
+endif
