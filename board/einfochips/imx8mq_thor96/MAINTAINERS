@@ -1,0 +1,6 @@
+i.MX8QXP AI_ML BOARD
+M:	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+S:	Maintained
+F:	board/einfochips/imx8qxp_ai_ml/
+F:	include/configs/imx8qxp_ai_ml.h
+F:	configs/imx8qxp_ai_ml_defconfig

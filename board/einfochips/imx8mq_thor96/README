@@ -1,0 +1,49 @@
+U-Boot for the Einfochips i.MX8QXP AI_ML board
+
+Quick Start
+===========
+
+- Get and Build the ARM Trusted firmware
+- Get scfw_tcm.bin and ahab-container.img
+- Build U-Boot
+- Flash the binary into the SD card
+- Boot
+
+Get and Build the ARM Trusted firmware
+======================================
+
+$ git clone https://source.codeaurora.org/external/imx/imx-atf
+$ cd imx-atf/
+$ git checkout origin/imx_4.9.88_imx8qxp_beta2 -b imx_4.9.88_imx8qxp_beta2
+$ make PLAT=imx8qxp bl31
+
+Get scfw_tcm.bin and ahab-container.img
+=======================================
+
+$ wget https://raw.githubusercontent.com/96boards-ai-ml/binaries/master/mx8qx-aiml-scfw-tcm.bin
+$ wget https://www.nxp.com/lgfiles/NMG/MAD/YOCTO/firmware-imx-8.1.bin
+$ chmod +x firmware-imx-8.1.bin
+$ ./firmware-imx-8.1.bin
+
+Copy the following binaries to U-Boot folder:
+
+$ cp imx-atf/build/imx8qxp/release/bl31.bin .
+$ cp firmware-imx-8.1/firmware/seco/mx8qx-ahab-container.img .
+
+Build U-Boot
+============
+
+$ make imx8qxp_ai_ml_defconfig
+$ make u-boot-dtb.imx
+
+Flash the binary into the SD card
+=================================
+
+Burn the u-boot-dtb.imx binary to SD card offset 32KB:
+
+$ sudo dd if=u-boot-dtb.imx of=/dev/sd[x] bs=1024 seek=32
+
+Boot
+====
+
+Set Boot switch SW2: 1100.

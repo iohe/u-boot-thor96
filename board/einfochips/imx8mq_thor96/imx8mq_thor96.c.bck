@@ -1,0 +1,116 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright 2018 NXP
+ * Copyright 2019 Linaro Ltd.
+ */
+
+#include <common.h>
+#include <errno.h>
+#include <linux/libfdt.h>
+#include <environment.h>
+#include <fsl_esdhc.h>
+#include <asm/io.h>
+#include <asm/arch/clock.h>
+#include <asm/arch/imx8mq_pins.h>
+//#include <asm/arch/iomux.h>
+#include <asm/arch/sys_proto.h>
+
+DECLARE_GLOBAL_DATA_PTR;
+
+#define UART_PAD_CTRL	((SC_PAD_CONFIG_OUT_IN << PADRING_CONFIG_SHIFT) | \
+			 (SC_PAD_ISO_OFF << PADRING_LPCONFIG_SHIFT) | \
+			 (SC_PAD_28FDSOI_DSE_DV_HIGH << PADRING_DSE_SHIFT) | \
+			 (SC_PAD_28FDSOI_PS_PU << PADRING_PULL_SHIFT))
+
+static iomux_cfg_t uart2_pads[] = {
+	SC_P_UART2_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
+	SC_P_UART2_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
+};
+
+static void setup_iomux_uart(void)
+{
+	imx8_iomux_setup_multiple_pads(uart2_pads, ARRAY_SIZE(uart2_pads));
+}
+
+int board_early_init_f(void)
+{
+	sc_pm_clock_rate_t rate = SC_80MHZ;
+	int ret;
+
+	/* Set UART2 clock root to 80 MHz */
+	ret = sc_pm_setup_uart(SC_R_UART_2, rate);
+	if (ret)
+		return ret;
+
+	setup_iomux_uart();
+
+	return 0;
+}
+
+#if IS_ENABLED(CONFIG_DM_GPIO)
+static void board_gpio_init(void)
+{
+	/* TODO */
+}
+#else
+static inline void board_gpio_init(void) {}
+#endif
+
+#if IS_ENABLED(CONFIG_FEC_MXC)
+#include <miiphy.h>
+
+int board_phy_config(struct phy_device *phydev)
+{
+	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x1f);
+	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x8);
+
+	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x05);
+	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x100);
+
+	if (phydev->drv->config)
+		phydev->drv->config(phydev);
+
+	return 0;
+}
+#endif
+
+int checkboard(void)
+{
+	puts("Board: iMX8MQ THOR96\n");
+
+	build_info();
+	print_bootinfo();
+
+	return 0;
+}
+
+int board_init(void)
+{
+	board_gpio_init();
+
+	return 0;
+}
+
+/* Board specific reset that is system reset */
+
+void reset_cpu(ulong addr)
+{
+	/* TODO */
+}
+
+#ifdef CONFIG_OF_BOARD_SETUP
+int ft_board_setup(void *blob, bd_t *bd)
+{
+	return 0;
+}
+#endif
+
+int board_mmc_get_env_dev(int devno)
+{
+	return devno;
+}
+
+int board_late_init(void)
+{
+	return 0;
+}
